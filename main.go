@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync"
 
 	"github.com/blocklisted/stormworks-metrics/templates"
@@ -19,7 +20,7 @@ var (
 )
 
 type State struct {
-	data  map[string]string
+	data  map[string]float64
 	mu    *sync.Mutex
 	notif *sync.Cond
 }
@@ -30,7 +31,7 @@ func newState() State {
 	notif := sync.NewCond(l)
 
 	return State{
-		data:  make(map[string]string),
+		data:  make(map[string]float64),
 		mu:    l,
 		notif: notif,
 	}
@@ -53,7 +54,13 @@ func main() {
 			v := params.Get(k)
 			slog.Info("found value in params", "key", k, "value", v)
 
-			STATE.data[k] = v
+			parsed_v, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				slog.Warn("invalid value in params", "key", k, "value", v)
+				continue
+			}
+
+			STATE.data[k] = parsed_v
 		}
 		STATE.notif.Broadcast()
 		STATE.mu.Unlock()
@@ -89,7 +96,7 @@ func main() {
 	slog.Error("error while serving http", "err", http.ListenAndServe(":8080", nil))
 }
 
-func sendStatus(data map[string]string) []byte {
+func sendStatus(data map[string]float64) []byte {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
 	sorted := types.SortedMap(data)
