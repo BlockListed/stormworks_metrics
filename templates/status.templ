@@ -1,9 +1,23 @@
 package templates
 
-templ Status(speed string, target_dir string) {
+import (
+	"strconv"
+	"strings"
+	"github.com/blocklisted/stormworks-metrics/types"
+)
+
+templ Status(data []types.Entry) {
 	<table id="status">
-		<tr><th>Speed</th><th>Target Direction</th></tr>
-		<tr><td>{ speed }</td><td>{ target_dir }</td></tr>
+		<tr>
+			for _, v := range data {
+				<th>{ strings.Title(v.K) }</th>
+			}
+		</tr>
+		<tr>
+			for _, v := range data {
+				<td>{ strconv.FormatFloat(v.V, 'f', 3, 32) }</td>
+			}
+		</tr>
 	</table>
 }
 

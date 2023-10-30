@@ -11,61 +11,58 @@ import (
 	"sync"
 
 	"github.com/blocklisted/stormworks-metrics/templates"
+	"github.com/blocklisted/stormworks-metrics/types"
 	"golang.org/x/net/websocket"
 )
 
+var (
+	ErrQueryParamNotFound = errors.New("query param not found")
+)
+
 type State struct {
-	speed      float64
-	target_dir float64
-	mu         *sync.Mutex
-	update     *sync.Cond
+	data  map[string]float64
+	mu    *sync.Mutex
+	notif *sync.Cond
 }
 
 func newState() State {
-	mu := &sync.Mutex{}
+	l := &sync.Mutex{}
 
-	update := sync.NewCond(mu)
+	notif := sync.NewCond(l)
 
 	return State{
-		speed:      0.0,
-		target_dir: 0.0,
-		mu:         mu,
-		update:     update,
+		data:  make(map[string]float64),
+		mu:    l,
+		notif: notif,
 	}
 }
 
 var STATE State = newState()
 
 func main() {
-	http.HandleFunc("/target", func(_ http.ResponseWriter, req *http.Request) {
-		target_dir, err := getFloatQueryParam(req, "dir")
-
+	http.HandleFunc("/log", func(_ http.ResponseWriter, req *http.Request) {
+		parsed_url, err := url.ParseRequestURI(req.RequestURI)
 		if err != nil {
-			slog.Error("could not get target dir query param", "err", err)
+			slog.Error("failed to parse request uri", "uri", req.RequestURI)
 			return
 		}
 
-		slog.Info("successfully parsed dir", "dir", target_dir)
+		params := parsed_url.Query()
 
 		STATE.mu.Lock()
-		STATE.target_dir = target_dir
-		STATE.update.Broadcast()
-		STATE.mu.Unlock()
-	})
+		for k := range params {
+			v := params.Get(k)
+			slog.Info("found value in params", "key", k, "value", v)
 
-	http.HandleFunc("/vehicle", func(_ http.ResponseWriter, req *http.Request) {
-		speed, err := getFloatQueryParam(req, "speed")
+			parsed_v, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				slog.Warn("invalid value in params", "key", k, "value", v)
+				continue
+			}
 
-		if err != nil {
-			slog.Error("could not get speed query param", "err", err)
-			return
+			STATE.data[k] = parsed_v
 		}
-
-		slog.Info("successfully parsed speed", "speed", speed)
-
-		STATE.mu.Lock()
-		STATE.speed = speed
-		STATE.update.Broadcast()
+		STATE.notif.Broadcast()
 		STATE.mu.Unlock()
 	})
 
@@ -78,64 +75,37 @@ func main() {
 
 		for {
 			STATE.mu.Lock()
-			STATE.update.Wait()
-			speed := STATE.speed
-			target_dir := STATE.target_dir
+			STATE.notif.Wait()
+			data := STATE.data
 			STATE.mu.Unlock()
 
-			slog.Info("acquired status data", "speed", speed, "target_dir", target_dir)
+			slog.Info("acquired status data", "data", data)
 
-			buf := sendStatus(speed, target_dir)
+			buf := sendStatus(data)
 			c.Write(buf)
 			slog.Info("sent status update")
 		}
 	}))
+
+	http.HandleFunc("/alive", func(_ http.ResponseWriter, _ *http.Request) {
+		slog.Info("ALIVE")
+	})
 
 	slog.Info("listening on port 8080")
 
 	slog.Error("error while serving http", "err", http.ListenAndServe(":8080", nil))
 }
 
-func sendStatus(speed float64, target_dir float64) []byte {
+func sendStatus(data map[string]float64) []byte {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	err := templates.Status(str_float(speed), str_float(target_dir))
+	sorted := types.SortedMap(data)
+
+	err := templates.Status(sorted).Render(context.Background(), buf)
 	if err != nil {
 		slog.Warn("couldn't write template to buffer", "err", err)
 		return []byte("<h2 id=\"status\">Internal Server Error</h2>")
 	}
 
 	return buf.Bytes()
-}
-
-func str_float(f float64) string {
-	return strconv.FormatFloat(f, 'f', 3, 64)
-}
-
-func getQueryParam(req *http.Request, key string) (string, error) {
-	params, err := url.ParseRequestURI(req.RequestURI)
-	if err != nil {
-		return "", err
-	}
-
-	query_str := params.Query().Get(key)
-	if query_str == "" {
-		return "", errors.New("query param not found")
-	}
-
-	return query_str, nil
-}
-
-func getFloatQueryParam(req *http.Request, key string) (float64, error) {
-	query_param, err := getQueryParam(req, key)
-	if err != nil {
-		return 0.0, err
-	}
-
-	query_float, err := strconv.ParseFloat(query_param, 64)
-	if err != nil {
-		return 0.0, err
-	}
-
-	return query_float, nil
 }
