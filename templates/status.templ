@@ -2,21 +2,30 @@ package templates
 
 import (
 	"strconv"
-	"strings"
 	"github.com/blocklisted/stormworks-metrics/types"
 )
 
-templ Status(data []types.Entry) {
+templ Status(data types.StatusInfo) {
 	<table id="status">
 		<tr>
-			for _, v := range data {
-				<th>{ strings.Title(v.K) }</th>
-			}
+			<th>Fuel</th>
+			<th>GPS X</th>
+			<th>GPS Y</th>
+			<th>GPS Z</th>
+			<th>Pitch Lookahead Distance</th>
+			<th>Target Direction</th>
+			<th>Target Distance</th>
+			<th>Vehicle Speed</th>
 		</tr>
 		<tr>
-			for _, v := range data {
-				<td>{ strconv.FormatFloat(v.V, 'f', 3, 32) }</td>
-			}
+			<td>{ strconv.FormatFloat(data.Fuel, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.GpsX, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.GpsY, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.GpsZ, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.PitchLookaheadDist, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.TargetDir, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.TargetDist, 'f', 3, 64) }</td>
+			<td>{ strconv.FormatFloat(data.VehicleSpeed, 'f', 3, 64) }</td>
 		</tr>
 	</table>
 }

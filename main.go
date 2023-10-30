@@ -20,7 +20,7 @@ var (
 )
 
 type State struct {
-	data  map[string]float64
+	data  types.StatusInfo
 	mu    *sync.Mutex
 	notif *sync.Cond
 }
@@ -31,7 +31,7 @@ func newState() State {
 	notif := sync.NewCond(l)
 
 	return State{
-		data:  make(map[string]float64),
+		data:  types.StatusInfo{},
 		mu:    l,
 		notif: notif,
 	}
@@ -60,7 +60,26 @@ func main() {
 				continue
 			}
 
-			STATE.data[k] = parsed_v
+			switch k {
+			case "fuel":
+				STATE.data.Fuel = parsed_v
+			case "gps_x":
+				STATE.data.GpsX = parsed_v
+			case "gps_y":
+				STATE.data.GpsY = parsed_v
+			case "gps_z":
+				STATE.data.GpsZ = parsed_v
+			case "pitch_lookahead_dist":
+				STATE.data.PitchLookaheadDist = parsed_v
+			case "target_dir":
+				STATE.data.TargetDir = parsed_v
+			case "target_dist":
+				STATE.data.TargetDir = parsed_v
+			case "vehicle_speed":
+				STATE.data.VehicleSpeed = parsed_v
+			default:
+				slog.Warn("unknown key found", "key", k)
+			}
 		}
 		STATE.notif.Broadcast()
 		STATE.mu.Unlock()
@@ -96,12 +115,10 @@ func main() {
 	slog.Error("error while serving http", "err", http.ListenAndServe(":8080", nil))
 }
 
-func sendStatus(data map[string]float64) []byte {
+func sendStatus(data types.StatusInfo) []byte {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	sorted := types.SortedMap(data)
-
-	err := templates.Status(sorted).Render(context.Background(), buf)
+	err := templates.Status(data).Render(context.Background(), buf)
 	if err != nil {
 		slog.Warn("couldn't write template to buffer", "err", err)
 		return []byte("<h2 id=\"status\">Internal Server Error</h2>")
