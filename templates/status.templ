@@ -1,0 +1,17 @@
+package templates
+
+templ Status(speed string, target_dir string) {
+	<table id="status">
+		<tr><th>Speed</th><th>Target Direction</th></tr>
+		<tr><td>{ speed }</td><td>{ target_dir }</td></tr>
+	</table>
+}
+
+templ StatusPage() {
+	@Base("Status") {
+		<div hx-ext="ws" ws-connect="/status_updates">
+			<h1>Status Information</h1>
+			<div id="status"></div>
+		</div>
+	}
+}
