@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"strconv"
 	"strings"
 	"github.com/blocklisted/stormworks-metrics/types"
 )
@@ -15,7 +14,7 @@ templ Status(data []types.Entry) {
 		</tr>
 		<tr>
 			for _, v := range data {
-				<td>{ strconv.FormatFloat(v.V, 'f', 3, 32) }</td>
+				<td>{ v.V }</td>
 			}
 		</tr>
 	</table>
