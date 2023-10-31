@@ -69,8 +69,8 @@ func main() {
 				STATE.data.GpsY = parsed_v
 			case "gps_z":
 				STATE.data.GpsZ = parsed_v
-			case "pitch_lookahead_dist":
-				STATE.data.PitchLookaheadDist = parsed_v
+			case "pitch_lookahead_secs":
+				STATE.data.PitchLookaheadSeconds = parsed_v
 			case "target_dir":
 				STATE.data.TargetDir = parsed_v
 			case "target_dist":
