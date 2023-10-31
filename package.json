@@ -1,0 +1,12 @@
+{
+  "name": "metric",
+  "version": "1.0.0",
+  "description": "THIS IS JUST USED FOR TAILWIND",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "build": "tailwindcss build -o static/tailwind.css"
+  },
+  "dependencies": {
+    "tailwindcss": "^3.3.5"
+  }
+}

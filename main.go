@@ -110,6 +110,8 @@ func main() {
 		slog.Info("ALIVE")
 	})
 
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+
 	slog.Info("listening on port 8080")
 
 	slog.Error("error while serving http", "err", http.ListenAndServe(":8080", nil))

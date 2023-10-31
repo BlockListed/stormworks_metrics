@@ -1,2 +1,4 @@
-*_templ.go
-stormworks-metrics
+/templates/*_templ.go
+/stormworks-metrics
+/static/tailwind.css
+/node_modules
