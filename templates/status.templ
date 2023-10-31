@@ -5,16 +5,21 @@ import (
 	"github.com/blocklisted/stormworks-metrics/types"
 )
 
-templ Status(data types.StatusInfo) {
-	<div class="flex flex-col p-3 border-4 border-sky-400" id="status">
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Fuel</h2><span>{ strconv.FormatFloat(data.Fuel, 'f', 3, 64) }l</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS X</h2><span>{ strconv.FormatFloat(data.GpsX, 'f', 3, 64) }</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS Y</h2><span>{ strconv.FormatFloat(data.GpsY, 'f', 3, 64) }</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS Z</h2><span>{ strconv.FormatFloat(data.GpsZ, 'f', 3, 64) }</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Pitch Lookahead Distance</h2><span>{ strconv.FormatFloat(data.PitchLookaheadSeconds, 'f', 3, 64) }s</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Target Direction</h2><span>{ strconv.FormatFloat(data.TargetDir, 'f', 3, 64) } turns</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Target Distance</h2><span>{ strconv.FormatFloat(data.TargetDist, 'f', 3, 64) }m</span></div>
-		<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Speed</h2><span>{ strconv.FormatFloat(data.VehicleSpeed, 'f', 3, 64) }m/s</span></div>
+templ Status(data []types.StatusInfo) {
+	<div id="status">
+		for _, v := range data {
+			<h2 class="font-bold text-xl">{ strconv.FormatUint(v.Id, 10) }:</h2>
+			<div class="flex flex-col p-3 border-4 border-sky-400">
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Fuel</h2><span>{ strconv.FormatFloat(v.Fuel, 'f', 3, 64) }l</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS X</h2><span>{ strconv.FormatFloat(v.GpsX, 'f', 3, 64) }</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS Y</h2><span>{ strconv.FormatFloat(v.GpsY, 'f', 3, 64) }</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">GPS Z</h2><span>{ strconv.FormatFloat(v.GpsZ, 'f', 3, 64) }</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Pitch Lookahead Distance</h2><span>{ strconv.FormatFloat(v.PitchLookaheadSeconds, 'f', 3, 64) }s</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Target Direction</h2><span>{ strconv.FormatFloat(v.TargetDir, 'f', 3, 64) } turns</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Target Distance</h2><span>{ strconv.FormatFloat(v.TargetDist, 'f', 3, 64) }m</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Speed</h2><span>{ strconv.FormatFloat(v.VehicleSpeed, 'f', 3, 64) }m/s</span></div>
+			</div>
+		}
 	</div>
 }
 

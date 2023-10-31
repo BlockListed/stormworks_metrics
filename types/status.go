@@ -1,6 +1,7 @@
 package types
 
 type StatusInfo struct {
+	Id                    uint64
 	Fuel                  float64
 	GpsX                  float64
 	GpsY                  float64
