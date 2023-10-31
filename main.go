@@ -190,12 +190,13 @@ func sendStatus(data []types.StatusInfo) []byte {
 	mean_speed := meanSpeed(data)
 	delta_dist := deltaDist(data)
 	active_missile_count := activeMissileCount(data)
+	hit_missile_count := hitMissileCount(data)
 
 	sort.Slice(data, func(i, j int) bool {
 		return data[i].Id < data[j].Id
 	})
 
-	err := templates.Status(data, median_speed, mean_speed, delta_dist, active_missile_count).Render(context.Background(), buf)
+	err := templates.Status(data, median_speed, mean_speed, delta_dist, active_missile_count, hit_missile_count).Render(context.Background(), buf)
 	if err != nil {
 		slog.Warn("couldn't write template to buffer", "err", err)
 		return []byte("<h2 id=\"status\">Internal Server Error</h2>")
@@ -254,6 +255,18 @@ func activeMissileCount(data []types.StatusInfo) int64 {
 	var count int64 = 0
 	for _, v := range data {
 		if v.VehicleSpeed >= active_speed {
+			count += 1
+		}
+	}
+
+	return count
+}
+
+func hitMissileCount(data []types.StatusInfo) int64 {
+	hit_distance := 200.0
+	var count int64 = 0
+	for _, v := range data {
+		if v.TargetDist <= hit_distance {
 			count += 1
 		}
 	}

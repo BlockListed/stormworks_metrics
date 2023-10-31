@@ -7,7 +7,7 @@ import (
 	"github.com/blocklisted/stormworks-metrics/types"
 )
 
-templ Status(data []types.StatusInfo, median_speed float64, mean_speed float64, delta_dist float64, active_missile_count int64) {
+templ Status(data []types.StatusInfo, median_speed float64, mean_speed float64, delta_dist float64, active_missile_count int64, hit_missile_count int64) {
 	<div id="status">
 		<h2 class="font-bold text-xl">General Information</h2>
 			<div class="flex flex-col p-3 border-4 border-sky-400">
@@ -15,6 +15,7 @@ templ Status(data []types.StatusInfo, median_speed float64, mean_speed float64, 
 				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Mean Speed</h2><span>{ strconv.FormatFloat(mean_speed, 'f', 3, 64) }m/s</span></div>
 				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Delta largest / smallest distance from target</h2><span>{ strconv.FormatFloat(delta_dist, 'f', 3, 64) }m</span></div>
 				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Missiles with speeds above 80m/s</h2><span>{ strconv.FormatInt(active_missile_count, 10) }</span></div>
+				<div class="flex flex-row items-center space-x-4 h-8"><h2 class="font-bold text-lg">Missile which have hit</h2><span>{ strconv.FormatInt(hit_missile_count, 10) }</span></div>
 			</div>
 		for _, v := range data {
 			<h2 class="font-bold text-xl">{ strconv.FormatUint(v.Id, 10) }:</h2>
