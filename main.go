@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"math"
 	"net/http"
 	"net/url"
 	"sort"
@@ -233,7 +234,7 @@ func meanSpeed(data []types.StatusInfo) float64 {
 // Calculate the difference between the largest speed and the smallest speed
 func deltaDist(data []types.StatusInfo) float64 {
 	max := 0.0
-	min := 0.0
+	min := math.Inf(1)
 	for _, v := range data {
 		dist := v.TargetDist
 
