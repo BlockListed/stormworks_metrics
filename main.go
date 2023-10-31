@@ -119,7 +119,7 @@ func main() {
 			case "target_dir":
 				data.TargetDir = parsed_v
 			case "target_dist":
-				data.TargetDir = parsed_v
+				data.TargetDist = parsed_v
 			case "vehicle_speed":
 				data.VehicleSpeed = parsed_v
 			default:
@@ -128,6 +128,7 @@ func main() {
 			}
 
 		}
+		data.LastUpdate = time.Now()
 		STATE.data[id] = data
 		STATE.mu.Unlock()
 
@@ -178,22 +179,70 @@ func main() {
 
 	slog.Info("listening on port 8080")
 
-	slog.Error("error while serving http", "err", http.ListenAndServe(":8080", nil))
+	slog.Error("error while serving http", "err", http.ListenAndServe("0.0.0.0:8080", nil))
 }
 
 func sendStatus(data []types.StatusInfo) []byte {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	sort.Slice(data, func(i, j int) bool {
+	median_speed := medianSpeed(data)
+	mean_speed := meanSpeed(data)
+	delta_dist := deltaDist(data)
 
+	sort.Slice(data, func(i, j int) bool {
 		return data[i].Id < data[j].Id
 	})
 
-	err := templates.Status(data).Render(context.Background(), buf)
+	err := templates.Status(data, median_speed, mean_speed, delta_dist).Render(context.Background(), buf)
 	if err != nil {
 		slog.Warn("couldn't write template to buffer", "err", err)
 		return []byte("<h2 id=\"status\">Internal Server Error</h2>")
 	}
 
 	return buf.Bytes()
+}
+
+func medianSpeed(data []types.StatusInfo) float64 {
+	if len(data) == 0 {
+		return 0.0
+	}
+
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].VehicleSpeed < data[j].VehicleSpeed
+	})
+
+	median_index := len(data) / 2
+
+	return data[median_index].VehicleSpeed
+}
+
+func meanSpeed(data []types.StatusInfo) float64 {
+	if len(data) == 0 {
+		return 0.0
+	}
+
+	accum := 0.0
+	for _, v := range data {
+		accum += v.VehicleSpeed
+	}
+
+	return accum / float64(len(data))
+}
+
+// Calculate the difference between the largest speed and the smallest speed
+func deltaDist(data []types.StatusInfo) float64 {
+	max := 0.0
+	min := 0.0
+	for _, v := range data {
+		dist := v.TargetDist
+
+		if dist > max {
+			max = dist
+		}
+		if dist < min {
+			min = dist
+		}
+	}
+
+	return max - min
 }

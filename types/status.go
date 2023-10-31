@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type StatusInfo struct {
 	Id                    uint64
 	Fuel                  float64
@@ -10,4 +12,5 @@ type StatusInfo struct {
 	TargetDir             float64
 	TargetDist            float64
 	VehicleSpeed          float64
+	LastUpdate            time.Time
 }

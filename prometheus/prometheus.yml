@@ -1,0 +1,9 @@
+global:
+  scrape_interval: "5s"
+
+scrape_configs:
+  - job_name: stormworks-metrics
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - "192.168.178.207:8080"

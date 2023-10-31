@@ -1,0 +1,28 @@
+version: "3"
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      prometheus:
+        aliases:
+          - "prometheus"
+    volumes:
+      - "./prometheus:/etc/prometheus"
+      - "prometheus:/prometheus"
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - "3000:3000"
+    networks:
+      prometheus:
+        aliases:
+          - "grafana"
+    volumes:
+      - "grafana:/var/lib/grafana"
+
+networks:
+  prometheus:
+
+volumes:
+  prometheus:
+  grafana:
