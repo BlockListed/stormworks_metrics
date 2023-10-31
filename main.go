@@ -252,7 +252,7 @@ func activeMissileCount(data []types.StatusInfo) int64 {
 	active_speed := 80.0
 	var count int64 = 0
 	for _, v := range data {
-		if v.VehicleSpeed <= active_speed {
+		if v.VehicleSpeed >= active_speed {
 			count += 1
 		}
 	}
