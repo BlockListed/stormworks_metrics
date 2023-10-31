@@ -21,7 +21,7 @@ templ Status(data types.StatusInfo) {
 templ StatusPage() {
 	@Base("Status") {
 		<div hx-ext="ws" ws-connect="/status_updates">
-			<h1>Status Information</h1>
+			<h1 class="font-extrabold text-2xl">Status Information</h1>
 			<div id="status"></div>
 		</div>
 	}
